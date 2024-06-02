@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"io"
 
 	"github.com/viniciusidacruz/grpc-http2/internal/database"
 	"github.com/viniciusidacruz/grpc-http2/internal/pb"
@@ -68,4 +69,32 @@ func (c *CategoryService) GetCategory(ctx context.Context, in *pb.GetCategoryReq
 	}
 
 	return categoryResponse, nil
+}
+
+func (c *CategoryService) CreateCategoryStream(stream pb.CategoryService_CreateCategoryStreamServer) error {
+	categories := &pb.Categories{}
+
+	for {
+		request, err := stream.Recv()
+
+		if err == io.EOF {
+			return stream.SendAndClose(categories)
+		}
+
+		if err != nil {
+			return err
+		}
+
+		category, err := c.CategoryDB.Create(request.Name, request.Description)
+
+		if err != nil {
+			return err
+		}
+
+		categories.Categories = append(categories.Categories, &pb.Category{
+			Id:          category.ID,
+			Name:        category.Name,
+			Description: category.Description,
+		})
+	}
 }
