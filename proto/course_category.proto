@@ -30,6 +30,7 @@ message Categories {
 service CategoryService {
     rpc CreateCategory(CreateCategoryRequest) returns (Category) {};
     rpc CreateCategoryStream(stream CreateCategoryRequest) returns (Categories) {};
+    rpc CreateCategoryStreamBirectional(stream CreateCategoryRequest) returns (stream Category) {};
     rpc GetCategories(blank) returns (Categories) {};
     rpc GetCategory(GetCategoryRequest) returns (Category) {};
 }
